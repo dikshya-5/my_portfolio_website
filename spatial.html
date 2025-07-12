@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spatial Analysis Tools</title>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  #container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* Left toolbar */
+  #toolbar {
+    width: 80px;
+    background: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+  }
+  .tool-icon {
+    width: 50px;
+    height: 50px;
+    margin: 15px 0;
+    cursor: pointer;
+    color: white;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    position: relative;
+  }
+  .tool-icon:hover {
+    background: #444;
+  }
+
+  /* Tooltip text */
+  .tooltip-text {
+    visibility: hidden;
+    width: 160px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 6px 8px;
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .tool-icon:hover .tooltip-text {
+    visibility: visible;
+  }
+
+  /* Map container */
+  #map {
+    flex-grow: 1;
+  }
+</style>
+</head>
+<body>
+
+<div id="container">
+  <div id="toolbar">
+    <div id="icon-restaurants" class="tool-icon" title="Show nearby restaurants">🍽
+      <span class="tooltip-text">Restaurants near you</span>
+    </div>
+    <div id="icon-busstops" class="tool-icon" title="Show nearby bus stops">🚌
+      <span class="tooltip-text">Bus stops near you</span>
+    </div>
+    <div id="icon-hospitals" class="tool-icon" title="Show nearby hospitals">🏥
+      <span class="tooltip-text">Hospitals near you</span>
+    </div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  let map = L.map('map').setView([0, 0], 15);
+  let userMarker;
+  let poiMarkers = [];
+  let routeLine;
+  let destBufferCircle;
+
+  // Add OSM tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(map);
+
+  let userLat, userLon;
+
+  // Get user location once at start
+  navigator.geolocation.getCurrentPosition(position => {
+    userLat = position.coords.latitude;
+    userLon = position.coords.longitude;
+    map.setView([userLat, userLon], 16);
+
+    // Default Leaflet icon (no custom icon needed)
+    userMarker = L.marker([userLat, userLon]).addTo(map).bindPopup("You are here").openPopup();
+  }, () => {
+    alert("Could not get your location.");
+  });
+
+  // Clear existing POI markers, route, and buffer
+  function clearMap() {
+    poiMarkers.forEach(m => map.removeLayer(m));
+    poiMarkers = [];
+    if(routeLine) {
+      map.removeLayer(routeLine);
+      routeLine = null;
+    }
+    if(destBufferCircle) {
+      map.removeLayer(destBufferCircle);
+      destBufferCircle = null;
+    }
+  }
+
+  // Overpass query helper
+  function fetchPOI(tag, callback) {
+    let queryTag = "";
+    if(tag === 'hospital') {
+      queryTag = `
+        node["amenity"="hospital"](around:1000,${userLat},${userLon});
+        way["amenity"="hospital"](around:1000,${userLat},${userLon});
+        relation["amenity"="hospital"](around:1000,${userLat},${userLon});
+      `;
+    } else {
+      queryTag = `node[${tag}](around:1000,${userLat},${userLon});`;
+    }
+
+    const query = `
+      [out:json][timeout:25];
+      (
+        ${queryTag}
+      );
+      out center;
+    `;
+
+    fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      body: query
+    })
+    .then(res => res.json())
+    .then(data => {
+      callback(data.elements);
+    })
+    .catch(() => {
+      alert("Failed to load POI data.");
+    });
+  }
+
+  // Show POIs and click handlers for routing prompt
+  function showPOIs(type, tag) {
+    if (!userLat || !userLon) return alert("User location not ready");
+    clearMap();
+    fetchPOI(tag, elements => {
+      if(elements.length === 0) {
+        alert(`No ${type}s found nearby.`);
+        return;
+      }
+      elements.forEach(el => {
+        let name = el.tags && el.tags.name ? el.tags.name : `Unnamed ${type}`;
+        let lat = el.lat || (el.center && el.center.lat);
+        let lon = el.lon || (el.center && el.center.lon);
+        if(!lat || !lon) return;
+
+        let iconOptions = {};
+        if(type === 'bus_stop'){
+          iconOptions = {icon: L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/10903/10903014.png',
+            iconSize: [25, 25],
+            iconAnchor: [12, 25],
+          })};
+        } else if(type === 'hospital'){
+          iconOptions = {icon: L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448435.png',
+            iconSize: [25, 25],
+            iconAnchor: [12, 25],
+          })};
+        } else if(type === 'restaurant'){
+          iconOptions = {icon: L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/5193/5193674.png',
+            iconSize: [25, 25],
+            iconAnchor: [12, 25],
+          })};
+        }
+
+        let marker = L.marker([lat, lon], iconOptions).addTo(map).bindPopup(name);
+        marker.on('click', () => {
+          if(confirm(`Do you want the shortest route to "${name}"?`)) {
+            drawRoute([lat, lon], name, type);
+          }
+        });
+        poiMarkers.push(marker);
+      });
+      map.fitBounds(L.featureGroup(poiMarkers).getBounds());
+      alert(`Showing ${elements.length} ${type}s near you. Click a marker to get route.`);
+    });
+  }
+
+  document.getElementById('icon-restaurants').addEventListener('click', () => {
+    showPOIs('restaurant', 'amenity="restaurant"');
+  });
+
+  document.getElementById('icon-busstops').addEventListener('click', () => {
+    showPOIs('bus_stop', 'highway="bus_stop"');
+  });
+
+  document.getElementById('icon-hospitals').addEventListener('click', () => {
+    showPOIs('hospital', 'hospital');
+  });
+
+  function drawRoute(destLatLng, name, type) {
+    if(routeLine) map.removeLayer(routeLine);
+    if(destBufferCircle) {
+      map.removeLayer(destBufferCircle);
+      destBufferCircle = null;
+    }
+
+    const distToDest = getDistance(userLat, userLon, destLatLng[0], destLatLng[1]);
+
+    if(distToDest <= 15) {
+      destBufferCircle = L.circle(destLatLng, {
+        radius: 15,
+        color: 'orange',
+        fillColor: '#ffcc88',
+        fillOpacity: 0.3
+      }).addTo(map);
+      alert(`You are within ${distToDest.toFixed(1)} meters of the destination.\nShowing 15-meter buffer.`);
+    } else {
+      alert(`Distance to destination: ${distToDest.toFixed(1)} meters.`);
+    }
+
+    const url = `https://router.project-osrm.org/route/v1/foot/${userLon},${userLat};${destLatLng[1]},${destLatLng[0]}?overview=full&geometries=geojson`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if(!data.routes || data.routes.length === 0) {
+          alert("Route not found.");
+          return;
+        }
+        const routeGeoJSON = data.routes[0].geometry;
+        routeLine = L.geoJSON(routeGeoJSON, {
+          style: {color: 'blue', weight: 4}
+        }).addTo(map);
+        map.fitBounds(routeLine.getBounds());
+        alert(`Showing shortest route to ${type}: "${name}"`);
+      })
+      .catch(() => {
+        alert("Failed to load route.");
+      });
+  }
+
+  // Haversine formula (distance in meters)
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+</script>
+
+</body>
+</html>
