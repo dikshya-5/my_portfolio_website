@@ -4,10 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Spatial Analysis Tools</title>
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet/dist/leaflet.css"
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%;
@@ -31,7 +28,7 @@
   .tool-icon {
     width: 50px;
     height: 50px;
-    margin: 15px 0;
+    margin: 20px 0;
     cursor: pointer;
     color: white;
     font-size: 28px;
@@ -85,6 +82,9 @@
     <div id="icon-hospitals" class="tool-icon" title="Show nearby hospitals">🏥
       <span class="tooltip-text">Hospitals near you</span>
     </div>
+    <div id="icon-usermanual" class="tool-icon" title="Open User Manual">📘
+      <span class="tooltip-text">User Manual</span>
+    </div>
   </div>
 
   <div id="map"></div>
@@ -98,7 +98,6 @@
   let routeLine;
   let destBufferCircle;
 
-  // Add OSM tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 19,
@@ -106,19 +105,16 @@
 
   let userLat, userLon;
 
-  // Get user location once at start
   navigator.geolocation.getCurrentPosition(position => {
     userLat = position.coords.latitude;
     userLon = position.coords.longitude;
     map.setView([userLat, userLon], 16);
 
-    // Default Leaflet icon (no custom icon needed)
     userMarker = L.marker([userLat, userLon]).addTo(map).bindPopup("You are here").openPopup();
   }, () => {
     alert("Could not get your location.");
   });
 
-  // Clear existing POI markers, route, and buffer
   function clearMap() {
     poiMarkers.forEach(m => map.removeLayer(m));
     poiMarkers = [];
@@ -132,18 +128,13 @@
     }
   }
 
-  // Overpass query helper
   function fetchPOI(tag, callback) {
-    let queryTag = "";
-    if(tag === 'hospital') {
-      queryTag = `
+    let queryTag = tag === 'hospital'
+      ? `
         node["amenity"="hospital"](around:1000,${userLat},${userLon});
         way["amenity"="hospital"](around:1000,${userLat},${userLon});
-        relation["amenity"="hospital"](around:1000,${userLat},${userLon});
-      `;
-    } else {
-      queryTag = `node[${tag}](around:1000,${userLat},${userLon});`;
-    }
+        relation["amenity"="hospital"](around:1000,${userLat},${userLon});`
+      : `node[${tag}](around:1000,${userLat},${userLon});`;
 
     const query = `
       [out:json][timeout:25];
@@ -158,15 +149,10 @@
       body: query
     })
     .then(res => res.json())
-    .then(data => {
-      callback(data.elements);
-    })
-    .catch(() => {
-      alert("Failed to load POI data.");
-    });
+    .then(data => callback(data.elements))
+    .catch(() => alert("Failed to load POI data."));
   }
 
-  // Show POIs and click handlers for routing prompt
   function showPOIs(type, tag) {
     if (!userLat || !userLon) return alert("User location not ready");
     clearMap();
@@ -175,31 +161,32 @@
         alert(`No ${type}s found nearby.`);
         return;
       }
+
       elements.forEach(el => {
-        let name = el.tags && el.tags.name ? el.tags.name : `Unnamed ${type}`;
-        let lat = el.lat || (el.center && el.center.lat);
-        let lon = el.lon || (el.center && el.center.lon);
+        let name = el.tags?.name || `Unnamed ${type}`;
+        let lat = el.lat || el.center?.lat;
+        let lon = el.lon || el.center?.lon;
         if(!lat || !lon) return;
 
         let iconOptions = {};
         if(type === 'bus_stop'){
-          iconOptions = {icon: L.icon({
+          iconOptions.icon = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/10903/10903014.png',
-            iconSize: [25, 25],
+            iconSize: [40, 40],
             iconAnchor: [12, 25],
-          })};
+          });
         } else if(type === 'hospital'){
-          iconOptions = {icon: L.icon({
+          iconOptions.icon = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448435.png',
-            iconSize: [25, 25],
+            iconSize: [40, 40],
             iconAnchor: [12, 25],
-          })};
+          });
         } else if(type === 'restaurant'){
-          iconOptions = {icon: L.icon({
+          iconOptions.icon = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/5193/5193674.png',
-            iconSize: [25, 25],
+            iconSize: [40, 40],
             iconAnchor: [12, 25],
-          })};
+          });
         }
 
         let marker = L.marker([lat, lon], iconOptions).addTo(map).bindPopup(name);
@@ -210,6 +197,7 @@
         });
         poiMarkers.push(marker);
       });
+
       map.fitBounds(L.featureGroup(poiMarkers).getBounds());
       alert(`Showing ${elements.length} ${type}s near you. Click a marker to get route.`);
     });
@@ -225,6 +213,10 @@
 
   document.getElementById('icon-hospitals').addEventListener('click', () => {
     showPOIs('hospital', 'hospital');
+  });
+
+  document.getElementById('icon-usermanual').addEventListener('click', function () {
+    alert("Click an icon to see nearby places.\nTap a result to view distance and route.");
   });
 
   function drawRoute(destLatLng, name, type) {
@@ -243,9 +235,9 @@
         fillColor: '#ffcc88',
         fillOpacity: 0.3
       }).addTo(map);
-      alert(`You are within ${distToDest.toFixed(1)} meters of the destination.\nShowing 15-meter buffer.`);
+      alert(`You are within ${distToDest.toFixed(1)} meters.\nShowing 15-meter buffer.`);
     } else {
-      alert(`Distance to destination: ${distToDest.toFixed(1)} meters.`);
+      alert(`Distance: ${distToDest.toFixed(1)} meters.`);
     }
 
     const url = `https://router.project-osrm.org/route/v1/foot/${userLon},${userLat};${destLatLng[1]},${destLatLng[0]}?overview=full&geometries=geojson`;
@@ -253,7 +245,7 @@
     fetch(url)
       .then(res => res.json())
       .then(data => {
-        if(!data.routes || data.routes.length === 0) {
+        if(!data.routes?.length) {
           alert("Route not found.");
           return;
         }
@@ -262,23 +254,18 @@
           style: {color: 'blue', weight: 4}
         }).addTo(map);
         map.fitBounds(routeLine.getBounds());
-        alert(`Showing shortest route to ${type}: "${name}"`);
+        alert(`Showing route to "${name}".`);
       })
-      .catch(() => {
-        alert("Failed to load route.");
-      });
+      .catch(() => alert("Failed to load route."));
   }
 
-  // Haversine formula (distance in meters)
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // metres
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
     const Δλ = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }

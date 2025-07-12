@@ -806,6 +806,19 @@ footer span a:hover {
   }
 }
 
+@media (max-width: 768px) {
+  .contact .contact-content {
+    flex-direction: column;
+  }
+
+  .contact .contact-content .right {
+    order: -1; /* Move the form section to the top on mobile */
+  }
+
+  .contact .contact-content .left {
+    order: 1; /* Move the contact info section below the form */
+  }
+}
 
 
 
