@@ -527,7 +527,7 @@ section .title::after {
 }
 
 .contact .right form .name {
-    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .contact .right form .email {
