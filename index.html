@@ -10,6 +10,8 @@
     <!-- CSS & Font Awesome -->
     <link rel="stylesheet" href="ports.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <script defer src="main.js"></script>
 </head>
 
 <body>
@@ -60,12 +62,7 @@
                         style="width:350px; height:350px; border-radius:100%" />
                 </div>
                 <div class="column right">
-                    <p>I'm immersed in mapping, surveying, and spatial data analysis. Besides my technical studies, I
-                        love getting involved in creative design projects that turn complex data into engaging visuals.
-                        This
-                        blend of precision and creativity helps me communicate spatial insights clearly and impactfully.
-                        Curious and hands-on, I'm always looking for new ways to apply geomatics skills beyond the
-                        classroom. I also have great leadership skills.</p>
+                    <p>I'm immersed in mapping, surveying, and spatial data analysis. Besides my technical studies, I love getting involved in creative design projects that turn complex data into engaging visuals. This blend of precision and creativity helps me communicate spatial insights clearly and impactfully. Curious and hands-on, I'm always looking for new ways to apply geomatics skills beyond the classroom. I also have great leadership skills.</p>
                 </div>
             </div>
         </div>
@@ -78,14 +75,7 @@
             <div class="skills-content">
                 <div class="column left">
                     <div class="text">My creative skills & experiences.</div>
-                    <p>I work with both maps and design. I can use surveying tools, GIS software, and Postgres SQL to
-                        turn location data into clear maps. I code basic projects in HTML, CSS, JavaScript, C, and C++.
-                        On
-                        the creative side, I was a designer for the GES Magazine team and part of the Creative Affairs
-                        team
-                        for TEDx Kathmandu University 2024, where I showed my skills in Adobe Illustrator, InDesign, and
-                        layout work. I also use Excel and Word for reports. These mixed experiences let me explain
-                        technical ideas with simple, eye-catching visuals.</p>
+                    <p>I work with both maps and design. I can use surveying tools, GIS software, and Postgres SQL to turn location data into clear maps. I code basic projects in HTML, CSS, JavaScript, C, and C++. On the creative side, I was a designer for the GES Magazine team and part of the Creative Affairs team or TEDx Kathmandu University 2024, where I showed my skills in Adobe Illustrator, InDesign, and layout work. I also use Excel and Word for reports. These mixed experiences let me explain technical ideas with simple, eye-catching visuals.</p>
                 </div>
                 <div class="column right">
                     <div class="bars">
@@ -143,9 +133,9 @@
             <h2 class="title">Projects and Papers</h2>
             <div class="carousel owl-carousel">
                 <div class="card">
-                    <a href="projects and paper\comparision Ahp and fuzzy ahp.pdf" target="_blank">
+                    <a href="projects and paper/comparision Ahp and fuzzy ahp.pdf" target="_blank">
                         <div class="box">
-                            <img src="images\Screenshot (114).png" alt="">
+                            <img src="images/Screenshot (114).png" alt="">
                             <div class="text">Flood Susceptibility Mapping</div>
                             <p>Comparative analysis between Ahp and Fuzzy Ahp: A case study on flood susceptibility of
                                 Koshi River Basin </p>
@@ -153,9 +143,9 @@
                     </a>
                 </div>
                 <div class="card">
-                    <a href="projects and paper\photo.pdf" target="_blank">
+                    <a href="projects and paper/photo.pdf" target="_blank">
                         <div class="box">
-                            <img src="images\detailed-digital-elevation-model-created-260nw-1067625272.jpg" alt="">
+                            <img src="images/detailed-digital-elevation-model-created-260nw-1067625272.jpg" alt="">
                             <div class="text">Photogrammetry</div>
                             <p>Digitizing features from aerial photographs for the preparation of
                                 detailed topographic maps to support accurate spatial representation and analysis.</p>
@@ -163,9 +153,9 @@
                     </a>
                 </div>
                 <div class="card">
-                    <a href="projects and paper\pgrou.pdf" target="_blank">
+                    <a href="projects and paper/pgrou.pdf" target="_blank">
                         <div class="box">
-                            <img src="images\hero_directions_api.png" alt="">
+                            <img src="images/hero_directions_api.png" alt="">
                             <div class="text">PG Routing</div>
                             <p>Using pgRouting to find the shortest path from Biratnagar to Kathmandu University for
                                 optimized route analysis.</p>
@@ -173,9 +163,9 @@
                     </a>
                 </div>
                 <div class="card">
-                    <a href="projects and paper\SheetCalculator.java" target="_blank">
+                    <a href="projects and paper/SheetCalculator.java" target="_blank">
                         <div class="box">
-                            <img src="images\digital-java-code-text-computer-software-coding-vector-19533161.jpg"
+                            <img src="images/digital-java-code-text-computer-software-coding-vector-19533161.jpg"
                                 alt="">
                             <div class="text">Map Sheet Calculator</div>
                             <p>Java-based GUI for calculating cadastral sheet numbers using scale and central meridian.
@@ -184,9 +174,9 @@
                     </a>
                 </div>
                 <div class="card">
-                    <a href="projects and paper\Cadastre1F.pdf" target="_blank">
+                    <a href="projects and paper/Cadastre1F.pdf" target="_blank">
                         <div class="box">
-                            <img src="images\hvorfor-har-vi-matriklen-902-x-508.webp" alt="">
+                            <img src="images/hvorfor-har-vi-matriklen-902-x-508.webp" alt="">
                             <div class="text">Danish Cadastre</div>
                             <p>A Brief History, Process and Challenges of Cadastral Surveying: A Case Study of Denmark
                             </p>
@@ -194,9 +184,9 @@
                     </a>
                 </div>
                 <div class="card">
-                    <a href="projects and paper\group O.pdf" target="_blank">
+                    <a href="projects and paper/group O.pdf" target="_blank">
                         <div class="box">
-                            <img src="images\images.jpeg" alt="">
+                            <img src="images/images.jpeg" alt="">
                             <div class="text">Land Administration</div>
                             <p>Nepal's Land Administration: A Historical Tapestry of Continuity and Change.</p>
                         </div>
@@ -242,16 +232,15 @@
                 </div>
                 <div class="column right">
                     <div class="text">Message me</div>
-                    <form name="submit-to-google-sheet">
+                    <form id="contact-form" name="submit-to-google-sheet">
                         <div class="fields">
-                            <div class="field name"><input type="text" name="name" placeholder="Name" required></div>
-                            <div class="field email"><input type="text" name="email" placeholder="Email" required></div>
+                            <div class="field name"><input type="text" id="name" name="name" placeholder="Name" required></div>
+                            <div class="field email"><input type="text" id="email" name="email" placeholder="Email" required></div>
                         </div>
-                        <div class="field textarea"><textarea cols="30" rows="10" name="message" placeholder="Message"
-                                required></textarea></div>
+                        <div class="field textarea"><textarea cols="30" rows="10" id="message" name="message" placeholder="Message" required></textarea></div>
                         <div class="button"><button type="submit">Submit</button></div>
                     </form>
-                    <span id="msg"></span>
+                    <div id="loading-message" style="display:none; margin-top: 10px; color: #555;">Sending message, please wait...</div>
                 </div>
             </div>
         </div>
@@ -262,81 +251,6 @@
         <span>Created by <a href="#">Dikshya Khadka</a> | <span class="far fa-copyright"></span> 2025 All rights
             reserved.</span>
     </footer>
-
-    <script>
-      const express = require('express');
-const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const cors = require('cors'); 
-const app = express();
-const port = 3000;
-
-// Middleware to parse JSON bodies
-app.use(bodyParser.json());
-app.use(cors());
-// Nodemailer setup
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'dikshyakhadka524@gmail.com',
-        pass: 'veosinqishbbhgbc'
-    }
-});
-
-// POST route to send the message
-app.post('/send-message', (req, res) => {
-    const { name, email, message } = req.body;
-
-    const mailOptions = {
-        from: email,
-        to: 'dikshyakhadka524@gmail.com', // Your email address where you want to receive messages
-        subject: New message from ${name},
-        text: Name: ${name}\nEmail: ${email}\nMessage: ${message},
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to send email',
-            });
-        }
-        res.json({
-            success: true,
-            message: 'Email sent successfully!',
-        });
-    });
-});
-app.get('/', (req, res) => {
-  res.send('Welcome to the homepage!');
-});
-
-app.listen(port, () => {
-    console.log(Server is running on http://localhost:${port});
-});
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const menuToggle = document.querySelector(".menu-toggle");
-            const menu = document.querySelector(".menu");
-            const icon = menuToggle.querySelector("i");
-
-            menuToggle.addEventListener("click", function () {
-                menu.classList.toggle("show");
-                icon.classList.toggle("fa-bars");
-                icon.classList.toggle("fa-times");
-            });
-
-            // Optional: close menu when a link is clicked
-            document.querySelectorAll(".menu a").forEach(link => {
-                link.addEventListener("click", () => {
-                    menu.classList.remove("show");
-                    icon.classList.add("fa-bars");
-                    icon.classList.remove("fa-times");
-                });
-            });
-        });
-    </script>
-
 </body>
 
 </html>
