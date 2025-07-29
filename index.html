@@ -264,21 +264,56 @@
     </footer>
 
     <script>
-        // Google Sheet Submission (unchanged)
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxmAV08hOmFCFsKGSsgZQ5hw1ZZO3ep46Fd1lBjD0meycdgZkCl_TzBuG0sEzjeUYRPTw/exec';
-        const form = document.forms['submit-to-google-sheet'];
-        const msg = document.getElementById("msg");
+      const express = require('express');
+const nodemailer = require('nodemailer');
+const bodyParser = require('body-parser');
+const cors = require('cors'); 
+const app = express();
+const port = 3000;
 
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
-                .then(response => {
-                    msg.innerHTML = "Message sent";
-                    setTimeout(() => msg.innerHTML = "", 5000);
-                    form.reset();
-                })
-                .catch(error => console.error('Error!', error.message));
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
+app.use(cors());
+// Nodemailer setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'dikshyakhadka524@gmail.com',
+        pass: 'veosinqishbbhgbc'
+    }
+});
+
+// POST route to send the message
+app.post('/send-message', (req, res) => {
+    const { name, email, message } = req.body;
+
+    const mailOptions = {
+        from: email,
+        to: 'dikshyakhadka524@gmail.com', // Your email address where you want to receive messages
+        subject: New message from ${name},
+        text: Name: ${name}\nEmail: ${email}\nMessage: ${message},
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to send email',
+            });
+        }
+        res.json({
+            success: true,
+            message: 'Email sent successfully!',
         });
+    });
+});
+app.get('/', (req, res) => {
+  res.send('Welcome to the homepage!');
+});
+
+app.listen(port, () => {
+    console.log(Server is running on http://localhost:${port});
+});
 
         document.addEventListener("DOMContentLoaded", function () {
             const menuToggle = document.querySelector(".menu-toggle");
